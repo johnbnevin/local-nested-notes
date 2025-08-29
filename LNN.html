@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Local Nested Notes</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M6 8h20v2H6zm2 4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg 
+xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 
+32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M6 8h20v2H6zm2 
+h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
     <style>
         :root {
             --bg-primary: #1a1a1a;
@@ -17,6 +20,8 @@
             --hover: #3a3a3a;
             --selected: #4a4a4a;
             --mono-font: 'Courier New', 'Monaco', 'Menlo', monospace;
+            --toolbar-height: 48px;
+            --header-height: 56px;
         }
 
         [data-theme="light"] {
@@ -29,11 +34,7 @@
             --selected: #d0d0d0;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: var(--mono-font);
@@ -60,18 +61,12 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            height: 48px;
+            height: var(--toolbar-height);
         }
 
-        .toolbar h1 {
-            font-size: 16px;
-            color: var(--accent-orange);
-        }
+        .toolbar h1 { font-size: 16px; color: var(--accent-orange); }
 
-        .toolbar-buttons {
-            display: flex;
-            gap: 8px;
-        }
+        .toolbar-buttons { display: flex; gap: 8px; }
 
         .btn {
             background: var(--bg-secondary);
@@ -83,27 +78,23 @@
             font-family: var(--mono-font);
         }
 
-        .btn:hover {
-            background: var(--hover);
-        }
-
-        .btn.accent {
-            background: var(--accent-orange);
-            color: black;
-        }
+        .btn:hover { background: var(--hover); }
+        .btn.accent { background: var(--accent-orange); color: black; }
 
         .unsaved-indicator {
             color: var(--accent-yellow);
             font-size: 12px;
         }
 
+        /* Sidebar */
         .sidebar {
             width: 300px;
             background: var(--bg-secondary);
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            margin-top: 48px;
+            margin-top: var(--toolbar-height); /* reserve space for fixed toolbar */
+            height: calc(100vh - var(--toolbar-height));
         }
 
         .sidebar-header {
@@ -130,19 +121,7 @@
             width: 100%;
         }
 
-        .search-input:focus {
-            outline: none;
-            border-color: var(--accent-orange);
-        }
-
-        .note-item.search-match {
-            background: var(--accent-yellow);
-            color: black;
-        }
-
-        .note-item.search-dimmed {
-            opacity: 0.3;
-        }
+        .search-input:focus { outline: none; border-color: var(--accent-orange); }
 
         .notes-tree {
             flex: 1;
@@ -159,24 +138,10 @@
             position: relative;
         }
 
-        .note-item:hover {
-            background: var(--hover);
-        }
-
-        .note-item.selected {
-            background: var(--selected);
-            border-color: var(--accent-orange);
-        }
-
-        .note-item.ctrl-selected {
-            background: var(--accent-yellow);
-            color: black;
-        }
-
-        .note-item.editable {
-            background: var(--bg-primary);
-            border: 1px solid var(--accent-orange);
-        }
+        .note-item:hover { background: var(--hover); }
+        .note-item.selected { background: var(--selected); border-color: var(--accent-orange); }
+        .note-item.ctrl-selected { background: var(--accent-yellow); color: black; }
+        .note-item.editable { background: var(--bg-primary); border: 1px solid var(--accent-orange); }
 
         .note-item input {
             background: transparent;
@@ -188,56 +153,36 @@
             width: 100%;
         }
 
-        .collapse-toggle {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            margin-right: 4px;
-            cursor: pointer;
-            user-select: none;
-            font-size: 10px;
-            text-align: center;
-            line-height: 12px;
-        }
+        .collapse-toggle { display: inline-block; width: 12px; height: 12px; margin-right: 4px; cursor: pointer; user-select: none; font-size: 10px; text-align: center; line-height: 12px; }
+        .collapse-toggle.empty { visibility: hidden; }
+        .drop-zone { height: 4px; background: var(--accent-orange); margin: 2px 0; border-radius: 2px; opacity: 0; transition: opacity 0.2s; }
 
-        .collapse-toggle:hover {
-            color: var(--accent-orange);
-        }
-
-        .collapse-toggle.empty {
-            visibility: hidden;
-        }
-
-        .drop-zone {
-            height: 4px;
-            background: var(--accent-orange);
-            margin: 2px 0;
-            border-radius: 2px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .drop-zone.active {
-            opacity: 1;
-        }
-
+        /* Note content area */
         .note-content {
-            flex: 1;
+            margin-top: var(--toolbar-height); /* keep below the fixed toolbar */
             display: flex;
             flex-direction: column;
-            margin-top: 48px;
+            height: calc(100vh - var(--toolbar-height));
+            width: calc(100% - 300px); /* account for sidebar width */
         }
 
         .content-header {
             padding: 12px;
             border-bottom: 1px solid var(--border);
             background: var(--bg-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: var(--header-height);
+            flex: 0 0 auto;
+            box-sizing: border-box;
         }
 
         .editor-container {
-            flex: 1;
+            flex: 1 1 auto;
             display: flex;
-            overflow: hidden;
+            overflow: auto;
+            height: calc(100% - var(--header-height));
         }
 
         .editor {
@@ -245,11 +190,11 @@
             display: flex;
             border-right: 1px solid var(--border);
             position: relative;
+            flex-direction: column;
+            min-width: 260px;
         }
 
-        .editor:last-child {
-            border-right: none;
-        }
+        .editor:last-child { border-right: none; }
 
         .line-numbers {
             background: var(--bg-secondary);
@@ -266,7 +211,7 @@
         }
 
         .editor-textarea {
-            flex: 1;
+            flex: 1 1 auto;
             background: var(--bg-primary);
             color: var(--text-primary);
             border: none;
@@ -277,6 +222,17 @@
             line-height: 1.5;
             resize: none;
             white-space: pre-wrap;
+            min-height: 120px;
+        }
+
+        .editor-word-count {
+            padding: 6px 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            background: var(--bg-secondary);
+            text-align: right;
+            flex: 0 0 auto;
         }
 
         .context-menu {
@@ -288,72 +244,24 @@
             min-width: 120px;
         }
 
-        .context-menu-item {
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: 12px;
-        }
+        .context-menu-item { padding: 8px 12px; cursor: pointer; font-size: 12px; }
+        .context-menu-item:hover { background: var(--hover); }
 
-        .context-menu-item:hover {
-            background: var(--hover);
-        }
-
-        .drag-over {
-            border: 2px dashed var(--accent-orange) !important;
-            background: var(--hover) !important;
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 3000;
-        }
-
-        .modal-content {
-            background: var(--bg-secondary);
-            padding: 24px;
-            border: 1px solid var(--border);
-            min-width: 300px;
-        }
-
-        .modal input {
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            font-family: var(--mono-font);
-        }
+        .drag-over { border: 2px dashed var(--accent-orange) !important; background: var(--hover) !important; }
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 3000; }
+        .modal-content { background: var(--bg-secondary); padding: 24px; border: 1px solid var(--border); min-width: 300px; }
+        .modal input { width: 100%; padding: 8px; margin: 8px 0; background: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border); font-family: var(--mono-font); }
 
         @media print {
-            .sidebar, .toolbar {
-                display: none !important;
-            }
-            .note-content {
-                margin-top: 0 !important;
-            }
-            .line-numbers {
-                background: white !important;
-                color: #666 !important;
-            }
-            .editor-textarea {
-                background: white !important;
-                color: black !important;
-            }
+            .sidebar, .toolbar { display: none !important; }
+            .note-content { margin-top: 0 !important; }
+            .line-numbers { background: white !important; color: #666 !important; }
+            .editor-textarea { background: white !important; color: black !important; }
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                width: 250px;
-            }
+            .sidebar { width: 250px; }
+            .note-content { width: calc(100% - 250px); }
         }
     </style>
 </head>
@@ -384,11 +292,13 @@
         <div class="note-content">
             <div class="content-header">
                 <span id="content-title">Select a note to edit</span>
+                <span id="word-count" style="display: none;"></span>
             </div>
             <div class="editor-container" id="editor-container">
                 <div class="editor">
                     <div class="line-numbers" id="line-numbers-1">1</div>
                     <textarea class="editor-textarea" id="editor-1" placeholder="Select a note to start writing..."></textarea>
+                    <div class="editor-word-count" id="word-count-editor-1">Words: 0</div>
                 </div>
             </div>
         </div>
@@ -422,11 +332,10 @@
             }
 
             initializeData() {
-                // Create initial notes if none exist
                 if (Object.keys(this.notes).length === 0) {
                     this.notes = {
                         1: { id: 1, title: 'Welcome', content: 'Welcome to Nested Local Notes!\n\nThis is a portable note-taking app that works entirely in your browser.\n\nFeatures:\n- Create nested notes\n- Drag and drop to reorder\n- Multiple note viewing (Ctrl+click)\n- Dark/light themes\n- Export/import data\n- Print support\n\nTry creating a new note or editing this one!', parent: null, order: 0 },
-                        2: { id: 2, title: 'Getting Started', content: 'Getting started is easy:\n\n1. Click the "➕ New Note" button to create notes\n2. Right-click notes for more options\n3. Drag notes to reorder them\n4. Ctrl+click to view multiple notes\n5. Use Export/Import to backup your data\n\nRemember: Data is not saved automatically.\nUse Export to save your work!', parent: null, order: 1 }
+                        2: { id: 2, title: 'Getting Started', content: 'Getting started is easy:\n\n1. Click the "➕ New Note" button to create notes\n2. Right-click notes for more options\n3. Drag notes to reorder them\n4. Ctrl+click to view multiple notes\n5. Use Export/Import to backup your data\n\nRemember: Data is not saved automatically. Use Export to save your work!', parent: null, order: 1 }
                     };
                     this.nextId = 3;
                     this.selectedNotes = [1];
@@ -434,7 +343,6 @@
             }
 
             bindEvents() {
-                // Context menu
                 document.addEventListener('contextmenu', (e) => {
                     const noteItem = e.target.closest('.note-item');
                     if (noteItem) {
@@ -443,12 +351,8 @@
                     }
                 });
 
-                // Click outside to close context menu
-                document.addEventListener('click', () => {
-                    this.hideContextMenu();
-                });
+                document.addEventListener('click', () => { this.hideContextMenu(); });
 
-                // File input for import
                 document.getElementById('file-input').addEventListener('change', (e) => {
                     this.handleFileImport(e.target.files[0]);
                 });
@@ -485,7 +389,6 @@
             deleteNote(noteId) {
                 if (!confirm('Delete this note and all its children?')) return;
 
-                // Find and delete children recursively
                 const deleteRecursive = (id) => {
                     Object.values(this.notes).filter(n => n.parent === id).forEach(child => {
                         deleteRecursive(child.id);
@@ -510,7 +413,6 @@
                     order: note.order + 1
                 };
 
-                // Adjust order of siblings
                 Object.values(this.notes)
                     .filter(n => n.parent === note.parent && n.order > note.order)
                     .forEach(n => n.order++);
@@ -523,7 +425,6 @@
             renameNote(noteId) {
                 const note = this.notes[noteId];
                 if (!note) return;
-
                 this.editingNote = noteId;
                 this.render();
             }
@@ -543,348 +444,206 @@
                 this.render();
             }
 
-            toggleCollapse(noteId) {
-                if (this.collapsedNodes.has(noteId)) {
-                    this.collapsedNodes.delete(noteId);
+            render() {
+                this.renderNotesTree();
+                this.renderEditors();
+            }
+
+            renderNotesTree() {
+                const container = document.getElementById('notes-tree');
+                container.innerHTML = '';
+
+                Object.values(this.notes)
+                    .sort((a, b) => a.order - b.order)
+                    .filter(note => note.parent === null)
+                    .forEach(note => {
+                        this.renderNoteItem(note, container, 0);
+                    });
+            }
+
+            renderNoteItem(note, container, level) {
+                const item = document.createElement('div');
+                item.className = 'note-item';
+                item.dataset.noteId = note.id;
+                item.style.paddingLeft = `${level * 16}px`;
+
+                if (this.selectedNotes.includes(note.id)) {
+                    if (this.selectedNotes.length > 1) item.classList.add('ctrl-selected');
+                    else item.classList.add('selected');
+                }
+
+                if (this.editingNote === note.id) {
+                    item.classList.add('editable');
+                    const input = document.createElement('input');
+                    input.value = note.title;
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') this.finishRename(note.id, input.value);
+                        if (e.key === 'Escape') this.cancelRename();
+                    });
+                    input.addEventListener('blur', () => this.finishRename(note.id, input.value));
+                    item.appendChild(input);
                 } else {
-                    this.collapsedNodes.add(noteId);
-                }
-                this.render();
-            }
-
-            hasChildren(noteId) {
-                return Object.values(this.notes).some(note => note.parent === noteId);
-            }
-
-            handleSearch(event) {
-                this.searchTerm = event.target.value.toLowerCase().trim();
-                this.performSearch();
-                this.render();
-            }
-
-            performSearch() {
-                this.searchMatches.clear();
-                
-                if (!this.searchTerm) {
-                    return;
+                    const titleSpan = document.createElement('span');
+                    titleSpan.textContent = note.title;
+                    item.appendChild(titleSpan);
                 }
 
-                Object.values(this.notes).forEach(note => {
-                    const titleMatch = note.title.toLowerCase().includes(this.searchTerm);
-                    const contentMatch = note.content.toLowerCase().includes(this.searchTerm);
-                    
-                    if (titleMatch || contentMatch) {
-                        this.searchMatches.add(note.id);
-                        // Auto-expand parent chain for matches
-                        this.expandParentChain(note.id);
-                    }
-                });
-            }
-
-            expandParentChain(noteId) {
-                const note = this.notes[noteId];
-                if (note && note.parent !== null) {
-                    this.collapsedNodes.delete(note.parent);
-                    this.expandParentChain(note.parent);
+                const collapseToggle = document.createElement('span');
+                collapseToggle.className = 'collapse-toggle';
+                const children = Object.values(this.notes).filter(n => n.parent === note.id);
+                if (children.length > 0) {
+                    const collapsed = this.collapsedNodes.has(note.id);
+                    collapseToggle.textContent = collapsed ? '+' : '-';
+                    collapseToggle.onclick = (e) => {
+                        e.stopPropagation();
+                        if (this.collapsedNodes.has(note.id)) this.collapsedNodes.delete(note.id);
+                        else this.collapsedNodes.add(note.id);
+                        this.render();
+                    };
+                } else {
+                    collapseToggle.classList.add('empty');
                 }
-            }
+                item.insertBefore(collapseToggle, item.firstChild);
 
-            selectNote(noteId, ctrlKey = false) {
-                if (ctrlKey) {
-                    const index = this.selectedNotes.indexOf(noteId);
-                    if (index === -1) {
-                        this.selectedNotes.push(noteId);
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    if (e.ctrlKey) {
+                        if (!this.selectedNotes.includes(note.id)) this.selectedNotes.push(note.id);
+                        else this.selectedNotes.splice(this.selectedNotes.indexOf(note.id), 1);
                     } else {
-                        this.selectedNotes.splice(index, 1);
+                        this.selectedNotes = [note.id];
                     }
-                } else {
-                    this.selectedNotes = [noteId];
+                    this.render();
+                };
+
+                item.addEventListener('dragstart', (e) => {
+                    this.draggedNote = note;
+                    e.dataTransfer.setData('text/plain', '');
+                });
+
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    item.classList.add('drag-over');
+                });
+
+                item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+
+                item.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    item.classList.remove('drag-over');
+                    const targetId = parseInt(item.dataset.noteId);
+                    const target = this.notes[targetId];
+                    const dragged = this.draggedNote;
+                    if (dragged && dragged.id !== target.id) {
+                        if (!this.isDescendant(dragged.id, target.id)) {
+                            dragged.parent = target.id;
+                            this.markUnsaved();
+                            this.render();
+                        }
+                    }
+                    this.draggedNote = null;
+                });
+
+                item.setAttribute('draggable', true);
+                container.appendChild(item);
+
+                if (!this.collapsedNodes.has(note.id)) {
+                    Object.values(this.notes)
+                        .filter(n => n.parent === note.id)
+                        .sort((a, b) => a.order - b.order)
+                        .forEach(child => this.renderNoteItem(child, container, level + 1));
                 }
-                this.render();
             }
 
-            showContextMenu(event, noteId) {
-                this.hideContextMenu();
+            showContextMenu(e, noteId) {
+                let existingMenu = document.querySelector('.context-menu');
+                if (existingMenu) existingMenu.remove();
 
                 const menu = document.createElement('div');
                 menu.className = 'context-menu';
-                menu.style.left = `${event.clientX}px`;
-                menu.style.top = `${event.clientY}px`;
 
-                const menuItems = [
-                    { text: '✏️ Rename', action: () => this.renameNote(noteId) },
-                    { text: '📋 Duplicate', action: () => this.duplicateNote(noteId) },
-                    { text: '➕ Add Child', action: () => this.addNote(noteId) },
-                    { text: '🗑️ Delete', action: () => this.deleteNote(noteId) }
-                ];
+                const deleteItem = document.createElement('div');
+                deleteItem.className = 'context-menu-item';
+                deleteItem.textContent = 'Delete';
+                deleteItem.onclick = (ev) => { ev.stopPropagation(); this.deleteNote(noteId); };
+                menu.appendChild(deleteItem);
 
-                menuItems.forEach(item => {
-                    const menuItem = document.createElement('div');
-                    menuItem.className = 'context-menu-item';
-                    menuItem.textContent = item.text;
-                    menuItem.onclick = (e) => {
-                        e.stopPropagation();
-                        item.action();
-                        this.hideContextMenu();
-                    };
-                    menu.appendChild(menuItem);
-                });
+                const renameItem = document.createElement('div');
+                renameItem.className = 'context-menu-item';
+                renameItem.textContent = 'Rename';
+                renameItem.onclick = (ev) => { ev.stopPropagation(); this.renameNote(noteId); };
+                menu.appendChild(renameItem);
 
+                const duplicateItem = document.createElement('div');
+                duplicateItem.className = 'context-menu-item';
+                duplicateItem.textContent = 'Duplicate';
+                duplicateItem.onclick = (ev) => { ev.stopPropagation(); this.duplicateNote(noteId); };
+                menu.appendChild(duplicateItem);
+
+                e.preventDefault();
+                menu.style.top = e.pageY + 'px';
+                menu.style.left = e.pageX + 'px';
                 document.body.appendChild(menu);
             }
 
             hideContextMenu() {
-                const existing = document.querySelector('.context-menu');
-                if (existing) existing.remove();
+                const menu = document.querySelector('.context-menu');
+                if (menu) menu.remove();
+            }
+
+            handleSearch(event) {
+                this.searchTerm = event.target.value.toLowerCase();
+                this.searchMatches.clear();
+                if (this.searchTerm) {
+                    Object.values(this.notes).forEach(note => {
+                        if (note.title.toLowerCase().includes(this.searchTerm)) this.searchMatches.add(note.id);
+                    });
+                }
+                this.render();
             }
 
             updateLineNumbers(textareaId, lineNumbersId) {
                 const textarea = document.getElementById(textareaId);
                 const lineNumbers = document.getElementById(lineNumbersId);
-                
                 if (!textarea || !lineNumbers) return;
-
-                const lines = textarea.value.split('\n').length;
-                const numbers = Array.from({length: lines}, (_, i) => i + 1).join('\n');
-                lineNumbers.textContent = numbers;
-
-                // Sync scroll
-                textarea.onscroll = () => {
-                    lineNumbers.scrollTop = textarea.scrollTop;
-                };
-            }
-
-            render() {
-                this.renderTree();
-                this.renderEditors();
-            }
-
-            renderTree() {
-                const tree = document.getElementById('notes-tree');
-                tree.innerHTML = '';
-
-                const renderNotes = (parentId, level = 0) => {
-                    const children = Object.values(this.notes)
-                        .filter(note => note.parent === parentId)
-                        .sort((a, b) => a.order - b.order);
-
-                    children.forEach((note, index) => {
-                        // Add drop zone before first item or between items
-                        if (index === 0) {
-                            const dropZone = this.createDropZone(parentId, -1, level);
-                            tree.appendChild(dropZone);
-                        }
-
-                        const item = document.createElement('div');
-                        item.className = 'note-item';
-                        item.dataset.noteId = note.id;
-                        item.style.paddingLeft = `${12 + level * 20}px`;
-                        
-                        if (this.selectedNotes.includes(note.id)) {
-                            if (this.selectedNotes.length > 1) {
-                                item.classList.add('ctrl-selected');
-                            } else {
-                                item.classList.add('selected');
-                            }
-                        }
-
-                        // Apply search styling
-                        if (this.searchTerm) {
-                            if (this.searchMatches.has(note.id)) {
-                                item.classList.add('search-match');
-                            } else {
-                                item.classList.add('search-dimmed');
-                            }
-                        }
-
-                        // Create collapse toggle
-                        const toggle = document.createElement('span');
-                        toggle.className = 'collapse-toggle';
-                        
-                        if (this.hasChildren(note.id)) {
-                            toggle.textContent = this.collapsedNodes.has(note.id) ? '▶' : '▼';
-                            toggle.onclick = (e) => {
-                                e.stopPropagation();
-                                this.toggleCollapse(note.id);
-                            };
-                        } else {
-                            toggle.classList.add('empty');
-                        }
-
-                        // Handle inline editing
-                        if (this.editingNote === note.id) {
-                            item.classList.add('editable');
-                            item.appendChild(toggle);
-                            const input = document.createElement('input');
-                            input.value = note.title;
-                            input.onblur = () => this.finishRename(note.id, input.value);
-                            input.onkeydown = (e) => {
-                                if (e.key === 'Enter') {
-                                    this.finishRename(note.id, input.value);
-                                } else if (e.key === 'Escape') {
-                                    this.cancelRename();
-                                }
-                            };
-                            item.appendChild(input);
-                            setTimeout(() => {
-                                input.focus();
-                                input.select();
-                            }, 0);
-                        } else {
-                            item.appendChild(toggle);
-                            const titleSpan = document.createElement('span');
-                            titleSpan.textContent = note.title;
-                            item.appendChild(titleSpan);
-                            
-                            // Double click to rename
-                            item.ondblclick = (e) => {
-                                e.stopPropagation();
-                                this.renameNote(note.id);
-                            };
-                        }
-
-                        // Click events
-                        item.onclick = (e) => {
-                            if (this.editingNote === note.id) return;
-                            if (e.target.classList.contains('collapse-toggle')) return;
-                            e.stopPropagation();
-                            this.selectNote(note.id, e.ctrlKey || e.metaKey);
-                        };
-
-                        // Drag and drop
-                        item.draggable = true;
-                        item.ondragstart = (e) => {
-                            this.draggedNote = note.id;
-                            e.dataTransfer.effectAllowed = 'move';
-                            item.style.opacity = '0.5';
-                        };
-
-                        item.ondragend = () => {
-                            item.style.opacity = '';
-                            this.clearDropZones();
-                        };
-
-                        tree.appendChild(item);
-
-                        // Render children only if not collapsed
-                        if (!this.collapsedNodes.has(note.id)) {
-                            renderNotes(note.id, level + 1);
-                        }
-
-                        // Add drop zone after each item
-                        const dropZone = this.createDropZone(parentId, index, level);
-                        tree.appendChild(dropZone);
-                    });
-
-                    // If no children, add a drop zone for empty parent
-                    if (children.length === 0 && parentId !== null) {
-                        const dropZone = this.createDropZone(parentId, -1, level);
-                        tree.appendChild(dropZone);
-                    }
-                };
-
-                renderNotes(null);
-            }
-
-            createDropZone(parentId, afterIndex, level) {
-                const dropZone = document.createElement('div');
-                dropZone.className = 'drop-zone';
-                dropZone.style.marginLeft = `${12 + level * 20}px`;
-                
-                dropZone.ondragover = (e) => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                    dropZone.classList.add('active');
-                };
-
-                dropZone.ondragleave = () => {
-                    dropZone.classList.remove('active');
-                };
-
-                dropZone.ondrop = (e) => {
-                    e.preventDefault();
-                    dropZone.classList.remove('active');
-                    
-                    if (this.draggedNote) {
-                        this.moveNoteToPosition(this.draggedNote, parentId, afterIndex);
-                        this.draggedNote = null;
-                    }
-                };
-
-                return dropZone;
-            }
-
-            clearDropZones() {
-                document.querySelectorAll('.drop-zone').forEach(zone => {
-                    zone.classList.remove('active');
-                });
-            }
-
-            moveNoteToPosition(noteId, newParentId, afterIndex) {
-                const note = this.notes[noteId];
-                if (!note) return;
-
-                // Don't allow moving a note into its own descendants
-                if (this.isDescendant(noteId, newParentId)) return;
-
-                const oldParent = note.parent;
-                const oldOrder = note.order;
-
-                // Update orders in old parent
-                if (oldParent !== null) {
-                    Object.values(this.notes)
-                        .filter(n => n.parent === oldParent && n.order > oldOrder)
-                        .forEach(n => n.order--);
-                }
-
-                // Set new parent and order
-                note.parent = newParentId;
-                
-                // Calculate new order
-                const siblings = Object.values(this.notes)
-                    .filter(n => n.parent === newParentId && n.id !== noteId)
-                    .sort((a, b) => a.order - b.order);
-
-                if (afterIndex === -1) {
-                    // Insert at beginning
-                    note.order = 0;
-                    siblings.forEach(n => n.order++);
-                } else {
-                    // Insert after specific index
-                    const targetOrder = afterIndex + 1;
-                    note.order = targetOrder;
-                    siblings.filter(n => n.order >= targetOrder).forEach(n => n.order++);
-                }
-
-                this.markUnsaved();
-                this.render();
+                const lines = textarea.value.split('\n').length || 1;
+                let html = '';
+                for (let i = 1; i <= lines; i++) html += i + '\n';
+                lineNumbers.textContent = html;
             }
 
             isDescendant(ancestorId, potentialDescendantId) {
-                if (potentialDescendantId === null) return false;
-                if (potentialDescendantId === ancestorId) return true;
-                
-                const potentialDescendant = this.notes[potentialDescendantId];
-                if (!potentialDescendant) return false;
-                
-                return this.isDescendant(ancestorId, potentialDescendant.parent);
+                if (!this.notes[potentialDescendantId]) return false;
+                let currentParent = this.notes[potentialDescendantId].parent;
+                while (currentParent !== null) {
+                    if (currentParent === ancestorId) return true;
+                    currentParent = this.notes[currentParent].parent;
+                }
+                return false;
             }
 
             renderEditors() {
                 const container = document.getElementById('editor-container');
                 const contentTitle = document.getElementById('content-title');
+                const wordCountTop = document.getElementById('word-count');
 
                 if (this.selectedNotes.length === 0) {
                     contentTitle.textContent = 'Select a note to edit';
-                    container.innerHTML = '<div class="editor"><div class="line-numbers">1</div><textarea class="editor-textarea" placeholder="Select a note to start writing..."></textarea></div>';
+                    container.innerHTML = '<div class="editor"><div class="line-numbers">1</div><textarea class="editor-textarea" placeholder="Select a note to start writing..."></textarea><div class="editor-word-count">Words: 0</div></div>';
+                    wordCountTop.style.display = 'none';
                     return;
                 }
 
                 if (this.selectedNotes.length === 1) {
                     const note = this.notes[this.selectedNotes[0]];
                     contentTitle.textContent = note ? note.title : 'Note not found';
+                    wordCountTop.style.display = 'inline';
+                    const content = note.content.trim();
+                    const count = content === '' ? 0 : content.split(/\s+/).length;
+                    wordCountTop.textContent = `Words: ${count}`;
                 } else {
                     contentTitle.textContent = `${this.selectedNotes.length} notes selected`;
+                    wordCountTop.style.display = 'none';
                 }
 
                 container.innerHTML = '';
@@ -895,39 +654,55 @@
 
                     const editor = document.createElement('div');
                     editor.className = 'editor';
-                    
+
                     const lineNumbers = document.createElement('div');
                     lineNumbers.className = 'line-numbers';
                     lineNumbers.id = `line-numbers-${index + 1}`;
-                    
+                    lineNumbers.style.minWidth = '40px';
+
                     const textarea = document.createElement('textarea');
                     textarea.className = 'editor-textarea';
                     textarea.id = `editor-${index + 1}`;
                     textarea.value = note.content;
                     textarea.placeholder = `Editing: ${note.title}`;
 
+                    const wc = document.createElement('div');
+                    wc.className = 'editor-word-count';
+                    wc.id = `word-count-editor-${index + 1}`;
+                    const initialCount = note.content.trim() === '' ? 0 : note.content.trim().split(/\s+/).length;
+                    wc.textContent = `Words: ${initialCount}`;
+
                     textarea.oninput = () => {
                         note.content = textarea.value;
                         this.markUnsaved();
                         this.updateLineNumbers(`editor-${index + 1}`, `line-numbers-${index + 1}`);
+                        if (this.selectedNotes.length === 1) {
+                            const contentText = note.content.trim();
+                            const count = contentText === '' ? 0 : contentText.split(/\s+/).length;
+                            document.getElementById('word-count').textContent = `Words: ${count}`;
+                        }
+                        const editorCount = note.content.trim() === '' ? 0 : note.content.trim().split(/\s+/).length;
+                        wc.textContent = `Words: ${editorCount}`;
                     };
 
-                    editor.appendChild(lineNumbers);
-                    editor.appendChild(textarea);
+                    const editorRow = document.createElement('div');
+                    editorRow.style.display = 'flex';
+                    editorRow.style.flex = '1 1 auto';
+                    editorRow.appendChild(lineNumbers);
+                    editorRow.appendChild(textarea);
+
+                    editor.appendChild(editorRow);
+                    editor.appendChild(wc);
+
                     container.appendChild(editor);
 
-                    // Initialize line numbers
+                    // Initialize line numbers after insertion
                     setTimeout(() => this.updateLineNumbers(`editor-${index + 1}`, `line-numbers-${index + 1}`), 0);
                 });
             }
 
             exportData() {
-                const data = {
-                    notes: this.notes,
-                    nextId: this.nextId,
-                    exportDate: new Date().toISOString()
-                };
-
+                const data = { notes: this.notes, nextId: this.nextId, exportDate: new Date().toISOString() };
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -935,7 +710,6 @@
                 a.download = `nested-notes-${new Date().toISOString().split('T')[0]}.json`;
                 a.click();
                 URL.revokeObjectURL(url);
-                
                 this.markSaved();
             }
 
@@ -945,7 +719,6 @@
 
             handleFileImport(file) {
                 if (!file) return;
-
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
@@ -953,8 +726,9 @@
                         if (data.notes && typeof data.notes === 'object') {
                             if (confirm('This will replace all current notes. Continue?')) {
                                 this.notes = data.notes;
-                                this.nextId = data.nextId || Math.max(...Object.keys(data.notes).map(Number)) + 1;
-                                this.selectedNotes = [];
+                                const ids = Object.keys(this.notes).map(k => Number(k)).filter(n => !Number.isNaN(n)).sort((a,b)=>a-b);
+                                this.nextId = data.nextId || (ids.length ? Math.max(...ids) + 1 : 1);
+                                this.selectedNotes = ids.length ? [ids[0]] : [];
                                 this.markSaved();
                                 this.render();
                             }
@@ -968,35 +742,19 @@
                 reader.readAsText(file);
             }
 
-            printNotes() {
-                window.print();
-            }
+            printNotes() { window.print(); }
         }
 
-        // Global functions
         function toggleTheme() {
             const body = document.body;
             const currentTheme = body.getAttribute('data-theme');
             body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
         }
+        function addNote() { app.addNote(); }
+        function exportData() { app.exportData(); }
+        function importData() { app.importData(); }
+        function printNotes() { app.printNotes(); }
 
-        function addNote() {
-            app.addNote();
-        }
-
-        function exportData() {
-            app.exportData();
-        }
-
-        function importData() {
-            app.importData();
-        }
-
-        function printNotes() {
-            app.printNotes();
-        }
-
-        // Initialize app
         const app = new NestedNotes();
     </script>
 </body>
