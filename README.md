@@ -1,45 +1,45 @@
 # local-nested-notes
-LNN - Local Nested Notes.  Keep notes local.  Nest them!  Simple, portable, private notes app.  Cross-platform, dependency free.  Works in any browser.
+Local Nested Notes (LNN) — Keep your notes local and organized in a simple, portable, and private way. LNN is a cross-platform, dependency-free notes app that works in any modern browser.
 
-## Core Functionality
+## Main Features
 
 * Nested tree structure in the left sidebar with intuitive navigation
-* Drag & drop reordering of notes
+* Drag-and-drop note reordering
 * Multi-note editing via `Ctrl+click` (notes appear tiled on the right)
-* Context menus (right-click) for rename, duplicate, add child, delete
-* All items are editable notes - no folder-only containers
+* Right-click context menus for rename, duplicate, add child, and delete
+* All items are editable notes—no folder-only containers
 
-## Technical Features
+## Technical Highlights
 
-* Single portable HTML file - no external dependencies
-* Cross-platform compatibility - works on all modern browsers/devices
-* Monospace font (Courier New/Monaco/Menlo) for consistent character width
-* Line numbering with proper scroll synchronization
-* Word wrap handled elegantly
+* Single portable HTML file, no external dependencies
+* Works across all modern browsers and devices
+* Monospace font (Courier New / Monaco / Menlo) for consistent character width
+* Line numbering with synchronized scrolling
+* Smooth word wrapping
 * Print function with proper margins and print-optimized styling
 
 ## Data Management
 
-* JSON export/import for backup and transfer
-* No automatic saving - data clears on refresh with warning
-* Unsaved changes indicator (yellow dot in toolbar)
-* Copy/paste works naturally with the textarea elements
+* Import/export notes as JSON for backup or transfer
+* No automatic saving—data clears on refresh (with warning)
+* Unsaved changes indicator (yellow dot in the toolbar)
+* Natural copy/paste support in text areas
 
-## UI/UX
+## Design & Experience
 
 * Dark/light theme toggle
-* Minimalist black/white design with orange/yellow accents
-* Responsive design that works on mobile devices
-* Keyboard shortcuts (`Ctrl+click` for multi-select)
-* Visual feedback for drag operations and selections
+* Minimal black-and-white design with orange/yellow highlights
+* Responsive design, mobile-friendly
+* Keyboard shortcuts (e.g., Ctrl+Click for multi-select)
+* Visual feedback for drag-and-drop and selections
 
-## Getting Started
+## How to use
 
-The app comes with two sample notes explaining how to use it. Simply:
+The app includes two sample notes to guide you. Just:
 
-* Click notes to select them
-* `Ctrl+click` to select multiple notes for side-by-side editing
+* Click a note to open it
+* Use `Ctrl+click` to select multiple notes for side-by-side editing
 * Right-click for context menu options
 * Drag notes to reorder them
-* Use Export to save your work as JSON
-* Use Import to restore from a saved file
+* Use Export to save notes as a JSON file
+* Use Import to restore notes from a saved file
