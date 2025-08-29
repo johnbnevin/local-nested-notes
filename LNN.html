@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Local Nested Notes</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg 
-xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 
-32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M6 8h20v2H6zm2 
-h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
+xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M6 8h20v2H6zm2 h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
     <style>
         :root {
             --bg-primary: #1a1a1a;
@@ -36,214 +34,56 @@ h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: var(--mono-font);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            height: 100vh;
-            overflow: hidden;
-        }
+        body { font-family: var(--mono-font); background: var(--bg-primary); color: var(--text-primary); height: 100vh; overflow: hidden; }
 
-        .app-container {
-            display: flex;
-            height: 100vh;
-        }
+        .app-container { display: flex; height: 100vh; }
 
-        .toolbar {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            height: var(--toolbar-height);
-        }
-
+        .toolbar { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 8px 16px; display: flex; align-items: center; gap: 16px; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: var(--toolbar-height); }
         .toolbar h1 { font-size: 16px; color: var(--accent-orange); }
-
         .toolbar-buttons { display: flex; gap: 8px; }
 
-        .btn {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 12px;
-            font-family: var(--mono-font);
-        }
-
+        .btn { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); padding: 4px 8px; cursor: pointer; font-size: 12px; font-family: var(--mono-font); }
         .btn:hover { background: var(--hover); }
         .btn.accent { background: var(--accent-orange); color: black; }
 
-        .unsaved-indicator {
-            color: var(--accent-yellow);
-            font-size: 12px;
-        }
+        .unsaved-indicator { color: var(--accent-yellow); font-size: 12px; }
 
-        /* Sidebar */
-        .sidebar {
-            width: 300px;
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            margin-top: var(--toolbar-height); /* reserve space for fixed toolbar */
-            height: calc(100vh - var(--toolbar-height));
-        }
+        .sidebar { width: 300px; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; margin-top: var(--toolbar-height); /* reserve space for fixed toolbar */ height: calc(100vh - var(--toolbar-height)); }
+        .sidebar-header { padding: 12px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+        .sidebar-header-top { display: flex; justify-content: space-between; align-items: center; }
 
-        .sidebar-header {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .sidebar-header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .search-input {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            padding: 4px 8px;
-            font-family: var(--mono-font);
-            font-size: 12px;
-            width: 100%;
-        }
-
+        .search-input { background: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border); padding: 4px 8px; font-family: var(--mono-font); font-size: 12px; width: 100%; }
         .search-input:focus { outline: none; border-color: var(--accent-orange); }
+		.search-banner { background: var(--accent-orange); color: black; text-align: center; padding: 4px 8px; font-size: 11px; border-bottom: 1px solid var(--border); }
 
-        .notes-tree {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px;
-        }
+        .notes-tree { flex: 1; overflow-y: auto; padding: 8px; }
 
-        .note-item {
-            display: block;
-            padding: 6px 12px;
-            cursor: pointer;
-            border: 1px solid transparent;
-            margin: 2px 0;
-            position: relative;
-        }
-
+        .note-item { display: block; padding: 6px 12px; cursor: pointer; border: 1px solid transparent; margin: 2px 0; position: relative; }
         .note-item:hover { background: var(--hover); }
         .note-item.selected { background: var(--selected); border-color: var(--accent-orange); }
         .note-item.ctrl-selected { background: var(--accent-yellow); color: black; }
+		.note-item.search-matched { background: var(--accent-orange); border: 1px solid var(--accent-orange); }
         .note-item.editable { background: var(--bg-primary); border: 1px solid var(--accent-orange); }
 
-        .note-item input {
-            background: transparent;
-            border: none;
-            outline: none;
-            font-family: var(--mono-font);
-            font-size: inherit;
-            color: inherit;
-            width: 100%;
-        }
+        .note-item input {background: transparent; border: none; outline: none; font-family: var(--mono-font); font-size: inherit; color: inherit; width }
 
         .collapse-toggle { display: inline-block; width: 12px; height: 12px; margin-right: 4px; cursor: pointer; user-select: none; font-size: 10px; text-align: center; line-height: 12px; }
         .collapse-toggle.empty { visibility: hidden; }
         .drop-zone { height: 4px; background: var(--accent-orange); margin: 2px 0; border-radius: 2px; opacity: 0; transition: opacity 0.2s; }
 
-        /* Note content area */
-        .note-content {
-            margin-top: var(--toolbar-height); /* keep below the fixed toolbar */
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - var(--toolbar-height));
-            width: calc(100% - 300px); /* account for sidebar width */
-        }
+        .note-content {margin-top: var(--toolbar-height); /* keep below the fixed toolbar */ display: flex; flex-direction: column; height: calc(100vh - var(--toolbar-height)); width: calc(100% - 300px); /* account for sidebar width */ }
 
-        .content-header {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg-secondary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: var(--header-height);
-            flex: 0 0 auto;
-            box-sizing: border-box;
-        }
+        .content-header { padding: 12px; border-bottom: 1px solid var(--border); background: var(--bg-secondary); display: flex; justify-content: space-between; align-items: center; height: var(--header-height); flex: 0 0 auto; box-sizing: border-box; }
 
-        .editor-container {
-            flex: 1 1 auto;
-            display: flex;
-            overflow: auto;
-            height: calc(100% - var(--header-height));
-        }
-
-        .editor {
-            flex: 1;
-            display: flex;
-            border-right: 1px solid var(--border);
-            position: relative;
-            flex-direction: column;
-            min-width: 260px;
-        }
-
+        .editor-container { flex: 1 1 auto; display: flex; overflow: auto; height: calc(100% - var(--header-height)); }
+        .editor { flex: 1; display: flex; border-right: 1px solid var(--border); position: relative; flex-direction: column; min-width: 260px; }
         .editor:last-child { border-right: none; }
+        .editor-textarea { flex: 1 1 auto; background: var(--bg-primary); color: var(--text-primary); border: none; outline: none; padding: 12px; font-family: var(--mono-font); font-size: 12px; line-height: 1.5; resize: none; white-space: pre-wrap; min-height: 120px; }
+        .editor-word-count { padding: 6px 12px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid var(--border); background: var(--bg-secondary); text-align: right; flex: 0 0 auto; }
 
-        .line-numbers {
-            background: var(--bg-secondary);
-            color: var(--text-secondary);
-            padding: 12px 8px;
-            font-size: 12px;
-            line-height: 1.5;
-            user-select: none;
-            border-right: 1px solid var(--border);
-            overflow: hidden;
-            white-space: pre;
-            text-align: right;
-            min-width: 40px;
-        }
+        .line-numbers { background: var(--bg-secondary); color: var(--text-secondary); padding: 12px 8px; font-size: 12px; line-height: 1.5; user-select: none; border-right: 1px solid var(--border); overflow: hidden; white-space: pre; text-align: right; min-width: 40px; }
 
-        .editor-textarea {
-            flex: 1 1 auto;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            border: none;
-            outline: none;
-            padding: 12px;
-            font-family: var(--mono-font);
-            font-size: 12px;
-            line-height: 1.5;
-            resize: none;
-            white-space: pre-wrap;
-            min-height: 120px;
-        }
-
-        .editor-word-count {
-            padding: 6px 12px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            border-top: 1px solid var(--border);
-            background: var(--bg-secondary);
-            text-align: right;
-            flex: 0 0 auto;
-        }
-
-        .context-menu {
-            position: absolute;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            z-index: 2000;
-            min-width: 120px;
-        }
-
+        .context-menu { position: absolute; background: var(--bg-secondary); border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 2000; min-width: 120px; }
         .context-menu-item { padding: 8px 12px; cursor: pointer; font-size: 12px; }
         .context-menu-item:hover { background: var(--hover); }
 
@@ -259,12 +99,10 @@ h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
             .editor-textarea { background: white !important; color: black !important; }
         }
 
-        @media (max-width: 768px) {
-            .sidebar { width: 250px; }
-            .note-content { width: calc(100% - 250px); }
-        }
+        @media (max-width: 768px) { .sidebar { width: 250px; } .note-content { width: calc(100% - 250px); } }
     </style>
 </head>
+
 <body data-theme="dark">
     <div class="toolbar">
         <h1>📝 Local Nested Notes</h1>
@@ -471,6 +309,10 @@ h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
                     if (this.selectedNotes.length > 1) item.classList.add('ctrl-selected');
                     else item.classList.add('selected');
                 }
+				
+				if (this.searchMatches.has(note.id)) {
+					item.classList.add('search-matched')
+				}
 
                 if (this.editingNote === note.id) {
                     item.classList.add('editable');
@@ -596,11 +438,26 @@ h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
                 this.searchMatches.clear();
                 if (this.searchTerm) {
                     Object.values(this.notes).forEach(note => {
-                        if (note.title.toLowerCase().includes(this.searchTerm)) this.searchMatches.add(note.id);
+                        if (note.title.toLowerCase().includes(this.searchTerm) || note.content.toLowerCase().includes(this.searchTerm)) this.searchMatches.add(note.id);
                     });
                 }
-                this.render();
+                if (this.searchMatches.size > 0) { this.selectedNotes = Array.from(this.searchMatches); } 
+				else if (this.searchTerm === '') { const firstNoteId = Object.keys(this.notes)[0]; this.selectedNotes = firstNoteId ? [parseInt(firstNoteId)] : [];
+				}
+				this.render();
             }
+
+			getSearchInfo(note) {
+				if (!this.searchTerm || !this.searchMatches.has(note.id)) return '';
+				
+				const lines = note.content.split('\n');
+				for (let i = 0; i < lines.length; i++) {
+					if (lines[i].toLowerCase().includes(this.searchTerm)) {
+						return ` | Match on Row ${i + 1}`;
+					}
+				}
+				return '';
+			}
 
             updateLineNumbers(textareaId, lineNumbersId) {
                 const textarea = document.getElementById(textareaId);
@@ -635,16 +492,23 @@ h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
                 }
 
                 if (this.selectedNotes.length === 1) {
-                    const note = this.notes[this.selectedNotes[0]];
-                    contentTitle.textContent = note ? note.title : 'Note not found';
-                    wordCountTop.style.display = 'inline';
-                    const content = note.content.trim();
-                    const count = content === '' ? 0 : content.split(/\s+/).length;
-                    wordCountTop.textContent = `Words: ${count}`;
-                } else {
-                    contentTitle.textContent = `${this.selectedNotes.length} notes selected`;
-                    wordCountTop.style.display = 'none';
-                }
+					const note = this.notes[this.selectedNotes[0]];
+					let searchInfo = '';
+					if (this.searchTerm) {
+						const matchCount = this.searchMatches.size;
+						searchInfo = ` | ${matchCount} matches for "${this.searchTerm}"`;
+					}
+					contentTitle.textContent = (note ? note.title : 'Note not found') + searchInfo;
+					// ... rest of code
+				} else {
+					let searchInfo = '';
+					if (this.searchTerm) {
+						const matchCount = this.searchMatches.size;
+						searchInfo = ` | ${matchCount} matches for "${this.searchTerm}"`;
+					}
+					contentTitle.textContent = `${this.selectedNotes.length} notes selected${searchInfo}`;
+					wordCountTop.style.display = 'none';
+				}
 
                 container.innerHTML = '';
 
@@ -654,6 +518,14 @@ h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
 
                     const editor = document.createElement('div');
                     editor.className = 'editor';
+					
+					if (this.searchTerm && this.searchMatches.has(note.id)) {
+						const banner = document.createElement('div');
+						banner.className = 'search-banner';
+						const lineInfo = this.getSearchInfo(note).replace(' | Match on row ', 'Match on row ');
+						banner.textContent = lineInfo;
+						editor.appendChild(banner);
+					}
 
                     const lineNumbers = document.createElement('div');
                     lineNumbers.className = 'line-numbers';
@@ -670,7 +542,8 @@ h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
                     wc.className = 'editor-word-count';
                     wc.id = `word-count-editor-${index + 1}`;
                     const initialCount = note.content.trim() === '' ? 0 : note.content.trim().split(/\s+/).length;
-                    wc.textContent = `Words: ${initialCount}`;
+                    const searchInfo = this.getSearchInfo(note);
+					wc.textContent = `Words: ${initialCount}`;
 
                     textarea.oninput = () => {
                         note.content = textarea.value;
@@ -682,7 +555,8 @@ h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
                             document.getElementById('word-count').textContent = `Words: ${count}`;
                         }
                         const editorCount = note.content.trim() === '' ? 0 : note.content.trim().split(/\s+/).length;
-                        wc.textContent = `Words: ${editorCount}`;
+						const searchInfo = this.getSearchInfo(note);
+						wc.textContent = `Words: ${editorCount}`;
                     };
 
                     const editorRow = document.createElement('div');
@@ -696,7 +570,6 @@ h4h16v2H8zm2 4h12v2h-12zm2 4h8v2h-8z' fill='%23FFA500'/%3E%3C/svg%3E">
 
                     container.appendChild(editor);
 
-                    // Initialize line numbers after insertion
                     setTimeout(() => this.updateLineNumbers(`editor-${index + 1}`, `line-numbers-${index + 1}`), 0);
                 });
             }
