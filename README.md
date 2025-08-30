@@ -1,6 +1,15 @@
 # local-nested-notes
 Local Nested Notes (LNN) — Keep your notes local and organized in a simple, portable, and private way. LNN is a cross-platform, dependency-free notes app that works in any modern browser.
 
+Contributors:
+John Martin
+https://github.com/JohnMartin0301
+Readme Humanization
+
+ChristosTheofylaktidis
+https://github.com/ChristosTheofylaktidis
+Added Word Count +
+
 ## Main Features
 
 * Nested tree structure in the left sidebar with intuitive navigation
