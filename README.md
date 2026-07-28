@@ -1,3 +1,14 @@
+> **Notice**
+>
+> Due to Microsoft/GitHub's recent willingness to remove bitchat software at the
+> behest of Indian government pressure, GitHub is no longer the source for my
+> latest repositories.
+>
+> See **[git.jbnco.co](https://git.jbnco.co)** for my projects, now hosted on
+> Nostr ngit.
+
+---
+
 # local-nested-notes
 Local Nested Notes (LNN) — Keep your notes local and organized in a simple, portable, and private way. LNN is a cross-platform, dependency-free notes app that works in any modern browser.
 
